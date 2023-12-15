@@ -7,24 +7,19 @@ import PIL.Image
 
 # Variables
 pictsDirectory = 'pictures'
-stdWidth = 500
-stdHeight = 500
+stdWidth = 600
+stdHeight = 600
 stdSize = (stdWidth, stdHeight)
 current = 0
 allPicts = []
 
 # Iterate through each file in the 'pictures' directory
-print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
-print(" Below are the files in the pictures folder VVV")
-print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 for filename in os.listdir(pictsDirectory):
   if("DS_Store" in filename):
     print("Invalid File Found!")
   else:
     fullName = os.path.join(pictsDirectory, filename) # pictures/example.jpg
-    print(fullName)
     allPicts.append(fullName)
-
 
 root = tk.Tk()                        # m is the name of the main window
 root.title('File Renamer')
@@ -37,15 +32,29 @@ nameVar = tk.StringVar()
 def submit():
   oldName = allPicts[current]
   newName = nameVar.get()
+  extension = oldName.split(".")
+  newName = "pictures/" + newName + "." + extension[1]
   if(len(newName) != 0):
     print("The new name for [" + oldName + "] is : " + newName)
+    os.rename(oldName, newName)
     nameVar.set("")
+    title.config(text=allPicts[current])
+
 
 title = tk.Label(frame, text=allPicts[current], fg='red')    # Prints the current picture name
 title.pack()
 
 currImg = PIL.Image.open(allPicts[current])           # Open the current picture
-currImg = currImg.resize(stdSize)                     # Resize the image to our liking
+ogWidth, ogHeight = currImg.size
+aspRat = ogWidth / ogHeight
+newRat = stdWidth / stdHeight
+if(newRat > aspRat):
+  resizeWidth = stdWidth
+  resizeHeight = round(resizeWidth * aspRat)
+else:
+  resizeHeight = stdHeight
+  resizeWidth = round(resizeHeight / aspRat)
+currImg = currImg.resize((resizeWidth, resizeHeight))  # Resize the image to our liking
 photoImg = PIL.ImageTk.PhotoImage(currImg)
 imageLabel = tk.Label(image=photoImg)                 # Put the image in a Label widget
 imageLabel.image = photoImg
@@ -53,7 +62,7 @@ imageLabel.pack()
 
 indexStr = str(current + 1) + "/" + str(len(allPicts))
 def next():
-  global current
+  global current, stdHeight, stdWidth
   # update the picture index value
   if(current < len(allPicts) - 1):
     current += 1
@@ -64,23 +73,42 @@ def next():
 
   # update the current display picture
   nextImg = PIL.Image.open(allPicts[current])
-  nextImg = nextImg.resize(stdSize)
+  ogWidth, ogHeight = currImg.size
+  aspRat = ogWidth / ogHeight
+  newRat = stdWidth / stdHeight
+  if(newRat > aspRat):
+    resizeWidth = stdWidth
+    resizeHeight = round(resizeWidth * aspRat)
+  else:
+    resizeHeight = stdHeight
+    resizeWidth = round(resizeHeight / aspRat)
+  nextImg = nextImg.resize((resizeWidth, resizeHeight))
   nextPI = PIL.ImageTk.PhotoImage(nextImg)
   imageLabel.configure(image=nextPI)
   imageLabel.image = nextPI
 
 def prev():
-  global current
+  global current, stdHeight, stdWidth
   # update the picture index value
   if(current > 0):
     current -= 1
     updateIndex = str(current + 1) + "/" + str(len(allPicts))
     pictIndex.config(text=updateIndex)
+    title.config(text=allPicts[current])
     #print("current index: " + updateIndex)
 
   # update the current display
   prevImg = PIL.Image.open(allPicts[current])
-  prevImg = prevImg.resize(stdSize)
+  ogWidth, ogHeight = currImg.size
+  aspRat = ogWidth / ogHeight
+  newRat = stdWidth / stdHeight
+  if(newRat > aspRat):
+    resizeWidth = stdWidth
+    resizeHeight = round(resizeWidth * aspRat)
+  else:
+    resizeHeight = stdHeight
+    resizeWidth = round(resizeHeight / aspRat)
+  prevImg = prevImg.resize((resizeWidth, resizeHeight))
   prevPI = PIL.ImageTk.PhotoImage(prevImg)
   imageLabel.configure(image=prevPI)
   imageLabel.image = prevPI
